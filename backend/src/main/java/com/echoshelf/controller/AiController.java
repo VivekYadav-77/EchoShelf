@@ -5,6 +5,7 @@ import com.echoshelf.dto.common.ApiResponse;
 import com.echoshelf.service.AiService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,7 +21,13 @@ public class AiController {
 
     @GetMapping("/library-summary")
     public ResponseEntity<ApiResponse<LibrarySummaryResponse>> getLibrarySummary() {
-        LibrarySummaryResponse summary = aiService.getLibrarySummary();
+        LibrarySummaryResponse summary = aiService.getLatestLibrarySummary();
+        return ResponseEntity.ok(ApiResponse.success("Success", summary));
+    }
+
+    @PostMapping("/library-summary/generate")
+    public ResponseEntity<ApiResponse<LibrarySummaryResponse>> generateLibrarySummary() {
+        LibrarySummaryResponse summary = aiService.generateLibrarySummary();
         return ResponseEntity.ok(ApiResponse.success("Success", summary));
     }
 }

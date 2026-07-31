@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.echoshelf.dto.ai.LibrarySummaryResponse;
+import com.echoshelf.entity.AiInsight;
 import com.echoshelf.entity.User;
+import com.echoshelf.repository.AiInsightRepository;
 import com.echoshelf.repository.LibraryItemRepository;
 import com.echoshelf.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +18,7 @@ import org.springframework.web.client.RestClient;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,15 +26,17 @@ public class AiService {
 
     private final LibraryItemRepository libraryItemRepository;
     private final UserRepository userRepository;
+    private final AiInsightRepository aiInsightRepository;
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
 
     @Value("${gemini.api-key:}")
     private String geminiApiKey;
 
-    public AiService(LibraryItemRepository libraryItemRepository, UserRepository userRepository) {
+    public AiService(LibraryItemRepository libraryItemRepository, UserRepository userRepository, AiInsightRepository aiInsightRepository) {
         this.libraryItemRepository = libraryItemRepository;
         this.userRepository = userRepository;
+        this.aiInsightRepository = aiInsightRepository;
         this.objectMapper = new ObjectMapper();
         this.restClient = RestClient.builder().baseUrl("https://generativelanguage.googleapis.com/v1beta/openai/").build();
     }
@@ -42,7 +47,33 @@ public class AiService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 
-    public LibrarySummaryResponse getLibrarySummary() {
+    public LibrarySummaryResponse getLatestLibrarySummary() {
+        User user = getCurrentUser();
+        Optional<AiInsight> insightOpt = aiInsightRepository.findByUserId(user.getId());
+
+        if (insightOpt.isEmpty()) {
+            return null; // Signals that no analysis has been done yet
+        }
+
+        AiInsight insight = insightOpt.get();
+        LibrarySummaryResponse response = new LibrarySummaryResponse();
+        response.setSummary(insight.getSummary());
+
+        try {
+            List<LibrarySummaryResponse.Recommendation> recs = objectMapper.readValue(
+                    insight.getRecommendations(),
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, LibrarySummaryResponse.Recommendation.class)
+            );
+            response.setRecommendations(recs);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            response.setRecommendations(List.of());
+        }
+
+        return response;
+    }
+
+    public LibrarySummaryResponse generateLibrarySummary() {
         if (geminiApiKey == null || geminiApiKey.trim().isEmpty()) {
             return buildFallbackResponse("API key is not configured.");
         }
@@ -53,8 +84,7 @@ public class AiService {
         // 1. Gather stats
         List<Map<String, Object>> genreData = libraryItemRepository.getGenreDistribution(userId);
         List<Map<String, Object>> artistData = libraryItemRepository.getTopArtists(userId);
-        long totalAlbums = libraryItemRepository.count(); // actually we should count by user id, simplified here
-        
+
         String genres = genreData.stream().map(g -> g.get("label").toString()).limit(5).collect(Collectors.joining(", "));
         String artists = artistData.stream().map(a -> a.get("label").toString()).limit(5).collect(Collectors.joining(", "));
 
@@ -93,7 +123,16 @@ public class AiService {
             JsonNode root = objectMapper.readTree(responseBody);
             String content = root.path("choices").get(0).path("message").path("content").asText();
             
-            return objectMapper.readValue(content, LibrarySummaryResponse.class);
+            LibrarySummaryResponse response = objectMapper.readValue(content, LibrarySummaryResponse.class);
+
+            // 4. Save to DB
+            AiInsight insight = aiInsightRepository.findByUserId(userId).orElse(new AiInsight());
+            insight.setUserId(userId);
+            insight.setSummary(response.getSummary());
+            insight.setRecommendations(objectMapper.writeValueAsString(response.getRecommendations()));
+            aiInsightRepository.save(insight);
+            
+            return response;
             
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { aiApi } from '@/features/ai/api';
 
 function RefreshIcon() {
@@ -13,17 +13,34 @@ function RefreshIcon() {
   );
 }
 
+function SparkleIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+    </svg>
+  );
+}
+
 export default function AiInsightsPage() {
-  const { data, isLoading, isError, refetch, isFetching } = useQuery({
+  const queryClient = useQueryClient();
+
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['ai', 'summary'],
     queryFn: aiApi.getLibrarySummary,
     staleTime: 5 * 60 * 1000,
   });
 
+  const { mutate: generateSummary, isPending: isGenerating } = useMutation({
+    mutationFn: aiApi.generateLibrarySummary,
+    onSuccess: (newData) => {
+      queryClient.setQueryData(['ai', 'summary'], newData);
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="rail" style={{ paddingTop: '3rem' }}>
-        <p className="loading-text">Analyzing your library...</p>
+        <p className="loading-text">Loading your insights...</p>
       </div>
     );
   }
@@ -32,10 +49,7 @@ export default function AiInsightsPage() {
     return (
       <div className="rail" style={{ paddingTop: '3rem', paddingBottom: '4rem' }}>
         <p style={{ fontSize: '1.125rem', color: 'var(--fg)', marginBottom: '0.5rem' }}>
-          Analysis failed.
-        </p>
-        <p style={{ fontSize: '0.875rem', color: 'var(--fg-dim)', marginBottom: '1.5rem' }}>
-          Make sure you have albums in your library, then try again.
+          Failed to load insights.
         </p>
         <button
           onClick={() => refetch()}
@@ -44,6 +58,14 @@ export default function AiInsightsPage() {
         >
           Try again
         </button>
+      </div>
+    );
+  }
+
+  if (isGenerating && !data) {
+    return (
+      <div className="rail" style={{ paddingTop: '3rem' }}>
+        <p className="loading-text">Analyzing your library... This might take a moment.</p>
       </div>
     );
   }
@@ -74,134 +96,157 @@ export default function AiInsightsPage() {
           </p>
         </div>
 
-        <button
-          onClick={() => refetch()}
-          disabled={isFetching}
-          title="Refresh analysis"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-            background: 'none',
-            border: 'none',
-            fontSize: '0.75rem',
-            letterSpacing: '0.06em',
-            color: 'var(--fg-dim)',
-            cursor: isFetching ? 'not-allowed' : 'pointer',
-            padding: 0,
-            transition: 'color 0.15s ease',
-            fontFamily: 'var(--font-mono), monospace',
-            textTransform: 'uppercase',
-          }}
-          onMouseEnter={e => (e.currentTarget.style.color = 'var(--fg)')}
-          onMouseLeave={e => (e.currentTarget.style.color = 'var(--fg-dim)')}
-        >
-          <RefreshIcon />
-          {isFetching ? 'Refreshing...' : 'Refresh'}
-        </button>
-      </div>
-
-      {/* Music profile summary */}
-      <section style={{ marginBottom: '4rem' }}>
-        <span
-          className="wordmark"
-          style={{
-            display: 'block',
-            fontSize: '0.7rem',
-            letterSpacing: '0.12em',
-            color: 'var(--brick)',
-            marginBottom: '1rem',
-          }}
-        >
-          01-Your music profile
-        </span>
-
-        <div
-          className="accent-block"
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '1rem',
-          }}
-        >
-          {data?.summary
-            ?.split('\n')
-            .filter((p: string) => p.trim())
-            .map((paragraph: string, idx: number) => (
-              <p
-                key={idx}
-                style={{
-                  fontSize: '1rem',
-                  lineHeight: 1.75,
-                  color: 'var(--fg)',
-                }}
-              >
-                {paragraph}
-              </p>
-            ))}
-        </div>
-      </section>
-
-      {/* Recommendations */}
-      {data?.recommendations && data.recommendations.length > 0 && (
-        <section>
-          <span
-            className="wordmark"
-            style={{
-              display: 'block',
-              fontSize: '0.7rem',
-              letterSpacing: '0.12em',
-              color: 'var(--brick)',
-              marginBottom: '1.5rem',
-            }}
-          >
-            02-Recommended for you
-          </span>
-
-          <div
+        {data && (
+          <button
+            onClick={() => generateSummary()}
+            disabled={isGenerating}
+            title="Regenerate analysis"
             style={{
               display: 'flex',
-              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.4rem',
+              background: 'none',
+              border: 'none',
+              fontSize: '0.75rem',
+              letterSpacing: '0.06em',
+              color: 'var(--fg-dim)',
+              cursor: isGenerating ? 'not-allowed' : 'pointer',
+              padding: 0,
+              transition: 'color 0.15s ease',
+              fontFamily: 'var(--font-mono), monospace',
+              textTransform: 'uppercase',
             }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--fg)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--fg-dim)')}
           >
-            {data.recommendations.map((rec: any, idx: number) => (
-              <div
-                key={idx}
+            <RefreshIcon />
+            {isGenerating ? 'Generating...' : 'Regenerate Analysis'}
+          </button>
+        )}
+      </div>
+
+      {!data ? (
+        <div style={{ textAlign: 'center', padding: '4rem 0' }}>
+          <h2 style={{ fontSize: '1.5rem', color: 'var(--fg)', marginBottom: '1rem', fontWeight: 500 }}>
+            Discover Your Music Identity
+          </h2>
+          <p style={{ fontSize: '1rem', color: 'var(--fg-dim)', marginBottom: '2rem', maxWidth: '400px', margin: '0 auto 2rem' }}>
+            Let AI analyze your collection to uncover patterns in your taste and suggest hidden gems you might have missed.
+          </p>
+          <button
+            onClick={() => generateSummary()}
+            disabled={isGenerating}
+            className="btn-brick"
+            style={{ padding: '0.75rem 2rem', fontSize: '1rem' }}
+          >
+            {isGenerating ? 'Analyzing...' : 'Analyze My Library'}
+          </button>
+        </div>
+      ) : (
+        <>
+          {/* Music profile summary */}
+          <section style={{ marginBottom: '4rem', opacity: isGenerating ? 0.5 : 1, transition: 'opacity 0.3s' }}>
+            <span
+              className="wordmark"
+              style={{
+                display: 'block',
+                fontSize: '0.7rem',
+                letterSpacing: '0.12em',
+                color: 'var(--brick)',
+                marginBottom: '1rem',
+              }}
+            >
+              01-Your music profile
+            </span>
+
+            <div
+              className="accent-block"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem',
+              }}
+            >
+              {data.summary
+                ?.split('\n')
+                .filter((p: string) => p.trim())
+                .map((paragraph: string, idx: number) => (
+                  <p
+                    key={idx}
+                    style={{
+                      fontSize: '1rem',
+                      lineHeight: 1.75,
+                      color: 'var(--fg)',
+                    }}
+                  >
+                    {paragraph}
+                  </p>
+                ))}
+            </div>
+          </section>
+
+          {/* Recommendations */}
+          {data.recommendations && data.recommendations.length > 0 && (
+            <section style={{ opacity: isGenerating ? 0.5 : 1, transition: 'opacity 0.3s' }}>
+              <span
+                className="wordmark"
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1.5rem 1fr',
-                  gap: '1.25rem',
-                  alignItems: 'start',
-                  padding: '1.25rem 0',
-                  borderBottom: '1px solid var(--border)',
+                  display: 'block',
+                  fontSize: '0.7rem',
+                  letterSpacing: '0.12em',
+                  color: 'var(--brick)',
+                  marginBottom: '1.5rem',
                 }}
               >
-                <span
-                  className="wordmark"
-                  style={{
-                    fontSize: '0.7rem',
-                    color: 'var(--fg-dim)',
-                    letterSpacing: '0.06em',
-                    paddingTop: '0.2rem',
-                  }}
-                >
-                  {String(idx + 1).padStart(2, '0')}
-                </span>
-                <div>
-                  <p style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--fg)', marginBottom: '0.15rem' }}>
-                    {rec.title}
-                  </p>
-                  <p style={{ fontSize: '0.875rem', color: 'var(--fg-dim)', marginBottom: '0.75rem' }}>
-                    {rec.artist}
-                  </p>
-                  <p style={{ fontSize: '0.875rem', color: 'var(--fg-dim)', lineHeight: 1.6 }}>
-                    {rec.reason}
-                  </p>
-                </div>
+                02-Recommended for you
+              </span>
+
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                {data.recommendations.map((rec: any, idx: number) => (
+                  <div
+                    key={idx}
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1.5rem 1fr',
+                      gap: '1.25rem',
+                      alignItems: 'start',
+                      padding: '1.25rem 0',
+                      borderBottom: '1px solid var(--border)',
+                    }}
+                  >
+                    <span
+                      className="wordmark"
+                      style={{
+                        fontSize: '0.7rem',
+                        color: 'var(--fg-dim)',
+                        letterSpacing: '0.06em',
+                        paddingTop: '0.2rem',
+                      }}
+                    >
+                      {String(idx + 1).padStart(2, '0')}
+                    </span>
+                    <div>
+                      <p style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--fg)', marginBottom: '0.15rem' }}>
+                        {rec.title}
+                      </p>
+                      <p style={{ fontSize: '0.875rem', color: 'var(--fg-dim)', marginBottom: '0.75rem' }}>
+                        {rec.artist}
+                      </p>
+                      <p style={{ fontSize: '0.875rem', color: 'var(--fg-dim)', lineHeight: 1.6 }}>
+                        {rec.reason}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </section>
+            </section>
+          )}
+        </>
       )}
     </div>
   );
