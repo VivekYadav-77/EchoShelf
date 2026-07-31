@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // Add the routes you want to protect here
-const protectedRoutes = ['/search', '/library', '/analytics', '/ai-insights', '/dashboard'];
+const protectedRoutes = ['/search', '/library', '/analytics', '/ai-insights', '/dashboard', '/profile'];
 const authRoutes = ['/login', '/register'];
 
 export function middleware(request: NextRequest) {
@@ -31,5 +31,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/dashboard/:path*', '/search/:path*', '/library/:path*', '/analytics/:path*', '/ai-insights/:path*', '/login', '/register'],
+  matcher: ['/', '/dashboard/:path*', '/search/:path*', '/library/:path*', '/analytics/:path*', '/ai-insights/:path*', '/profile/:path*', '/login', '/register'],
 };

@@ -155,16 +155,20 @@ export default function Navbar() {
           {!isLoading && (
             isAuthenticated ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <span
+                <Link
+                  href="/profile"
                   style={{
                     fontSize: '0.8125rem',
                     color: 'var(--fg-dim)',
-                    display: 'none',
+                    textDecoration: 'none',
+                    transition: 'color 0.15s ease',
                   }}
-                  className="md:block"
+                  className="hidden md:block"
+                  onMouseEnter={e => (e.currentTarget.style.color = 'var(--fg)')}
+                  onMouseLeave={e => (e.currentTarget.style.color = 'var(--fg-dim)')}
                 >
                   {user?.username}
-                </span>
+                </Link>
                 <button
                   onClick={() => logoutMutation.mutate()}
                   disabled={logoutMutation.isPending}
