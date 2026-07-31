@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: echoshelf-db
+    environment:
+      POSTGRES_USER: ${DB_USER:-echoshelf_admin}
+      POSTGRES_PASSWORD: ${DB_PASS:-echoshelf_pass123}
+      POSTGRES_DB: echoshelf
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U echoshelf_admin -d echoshelf"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: 
+      context: ./backend
+    container_name: echoshelf-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/echoshelf
+      - SPRING_DATASOURCE_USERNAME=${DB_USER:-echoshelf_admin}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASS:-echoshelf_pass123}
+      - JWT_SECRET=${JWT_SECRET:-9a4f2c8d3b7a1e6f45c8a0b3f267d8b1d4e6f3c8a9d2b5f8e3a9c8b5f6v8a3d9}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - ECHOSHELF_FRONTEND_URL=http://localhost:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: echoshelf-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

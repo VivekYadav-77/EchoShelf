@@ -1,0 +1,20 @@
+# Node
+node_modules/
+.npm/
+
+# Java / Maven
+target/
+*.jar
+*.war
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.swp
+.DS_Store
+
+# Env
+.env
+.env.local

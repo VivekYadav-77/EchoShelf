@@ -1,0 +1,176 @@
+@import "tailwindcss";
+
+/* ─── Design Tokens ───────────────────────────────────────────── */
+
+:root,
+[data-theme="dark"] {
+  --bg: #0a0a0a;
+  --fg: #f0f0f0;
+  --fg-dim: #888888;
+  --border: #222222;
+  --brick: #c0392b;
+  --brick-hover: #a93226;
+  --input-bg: #111111;
+}
+
+[data-theme="light"] {
+  --bg: #fafafa;
+  --fg: #111111;
+  --fg-dim: #777777;
+  --border: #e0e0e0;
+  --brick: #c0392b;
+  --brick-hover: #a93226;
+  --input-bg: #ffffff;
+}
+
+/* ─── Base ────────────────────────────────────────────────────── */
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1.2;
+    font-weight: 600;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  ::selection {
+    background-color: var(--brick);
+    color: #fff;
+  }
+}
+
+/* ─── Utilities ───────────────────────────────────────────────── */
+
+/* Brick (primary CTA) button */
+.btn-brick {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--brick);
+  color: #ffffff;
+  padding: 0.625rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.15s ease;
+}
+
+.btn-brick:hover {
+  background-color: var(--brick-hover);
+}
+
+.btn-brick:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Ghost button */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  color: var(--fg);
+  padding: 0.625rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-ghost:hover {
+  border-color: var(--fg);
+}
+
+/* Underline field — borderless input with bottom border only */
+.field {
+  width: 100%;
+  background: transparent;
+  color: var(--fg);
+  border: none;
+  border-bottom: 1px solid var(--border);
+  padding: 0.625rem 0;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.field:focus {
+  border-bottom-color: var(--fg);
+}
+
+.field::placeholder {
+  color: var(--fg-dim);
+}
+
+/* Section divider */
+.rule {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0;
+}
+
+/* Flat card — no shadow, border only */
+.card {
+  background-color: transparent;
+  border: 1px solid var(--border);
+}
+
+/* Brick left-border accent block */
+.accent-block {
+  border-left: 3px solid var(--brick);
+  padding-left: 1.25rem;
+}
+
+/* Monospace wordmark */
+.wordmark {
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: -0.02em;
+}
+
+/* Page rail — controlled max-width for content */
+.rail {
+  width: 100%;
+  max-width: 1024px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+/* Loading state — subtle fade */
+.loading-text {
+  color: var(--fg-dim);
+  font-size: 0.875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
