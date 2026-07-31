@@ -51,7 +51,7 @@ export default function SearchPage() {
   return (
     <div className="rail" style={{ paddingTop: '3rem', paddingBottom: '4rem' }}>
 
-      {/* Search form — input as hero */}
+      {/* Search form-input as hero */}
       <form onSubmit={handleSearch} style={{ marginBottom: '3rem' }}>
         <div style={{ position: 'relative' }}>
           <input

@@ -10,9 +10,9 @@ import { useTheme } from '@/components/providers/ThemeProvider';
 import { useEffect } from 'react';
 
 const NAV_LINKS = [
-  { href: '/search',      label: 'Search' },
-  { href: '/library',     label: 'Library' },
-  { href: '/analytics',   label: 'Analytics' },
+  { href: '/search', label: 'Search' },
+  { href: '/library', label: 'Library' },
+  { href: '/analytics', label: 'Analytics' },
   { href: '/ai-insights', label: 'AI Insights' },
 ];
 
@@ -83,7 +83,7 @@ export default function Navbar() {
       >
         {/* Wordmark */}
         <Link
-          href="/"
+          href={isAuthenticated && !isLoading ? '/dashboard' : '/'}
           className="wordmark"
           style={{
             fontSize: '1rem',
@@ -96,7 +96,7 @@ export default function Navbar() {
           ECHOSHELF
         </Link>
 
-        {/* Nav links — only when authenticated */}
+        {/* Nav links-only when authenticated */}
         {!isLoading && isAuthenticated && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', flex: 1 }}>
             {NAV_LINKS.map(({ href, label }) => {

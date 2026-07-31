@@ -320,7 +320,7 @@ export default function LibraryPage() {
                       Cancel
                     </button>
 
-                    {/* Delete — inline confirm */}
+                    {/* Delete-inline confirm */}
                     {deleteConfirmId === item.id ? (
                       <span style={{ marginLeft: 'auto', fontSize: '0.8125rem', color: 'var(--fg-dim)' }}>
                         Remove?{' '}

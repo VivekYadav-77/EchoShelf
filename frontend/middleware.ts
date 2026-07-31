@@ -2,12 +2,17 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // Add the routes you want to protect here
-const protectedRoutes = ['/search', '/library', '/analytics', '/ai-insights'];
+const protectedRoutes = ['/search', '/library', '/analytics', '/ai-insights', '/dashboard'];
 const authRoutes = ['/login', '/register'];
 
 export function middleware(request: NextRequest) {
   const jwt = request.cookies.get('jwt');
   const path = request.nextUrl.pathname;
+
+  // If user is authenticated and visits root, redirect to dashboard
+  if (path === '/' && jwt) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
 
   const isProtectedRoute = protectedRoutes.some((route) => path.startsWith(route));
   const isAuthRoute = authRoutes.some((route) => path.startsWith(route));
@@ -26,5 +31,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/search/:path*', '/library/:path*', '/analytics/:path*', '/ai-insights/:path*', '/login', '/register'],
+  matcher: ['/', '/dashboard/:path*', '/search/:path*', '/library/:path*', '/analytics/:path*', '/ai-insights/:path*', '/login', '/register'],
 };

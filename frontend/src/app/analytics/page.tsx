@@ -9,7 +9,7 @@ import {
 
 // Monochromatic palette: shades of fg and one brick accent
 const MONO_COLORS = [
-  '#c0392b', // brick — highlight color
+  '#c0392b', // brick-highlight color
   '#888888',
   '#aaaaaa',
   '#cccccc',

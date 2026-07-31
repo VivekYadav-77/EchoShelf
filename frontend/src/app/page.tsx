@@ -53,7 +53,7 @@ export default function Home() {
             }}
           >
             Catalog albums, track personal ratings and notes, and get AI-powered
-            insights on your listening identity — all in one place.
+            insights on your listening identity-all in one place.
           </p>
 
           <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>

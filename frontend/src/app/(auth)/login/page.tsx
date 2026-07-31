@@ -20,7 +20,7 @@ export default function LoginPage() {
       try {
         const user = await authApi.getCurrentUser();
         setUser(user);
-        router.push('/search');
+        router.push('/dashboard');
       } catch {
         setErrorMsg('Failed to load user profile');
       }

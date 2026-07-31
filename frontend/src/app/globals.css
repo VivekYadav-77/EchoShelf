@@ -42,7 +42,12 @@
     line-height: 1.6;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     line-height: 1.2;
     font-weight: 600;
   }
@@ -105,7 +110,7 @@
   border-color: var(--fg);
 }
 
-/* Underline field — borderless input with bottom border only */
+/* Underline field-borderless input with bottom border only */
 .field {
   width: 100%;
   background: transparent;
@@ -133,7 +138,7 @@
   margin: 0;
 }
 
-/* Flat card — no shadow, border only */
+/* Flat card-no shadow, border only */
 .card {
   background-color: transparent;
   border: 1px solid var(--border);
@@ -151,7 +156,7 @@
   letter-spacing: -0.02em;
 }
 
-/* Page rail — controlled max-width for content */
+/* Page rail-controlled max-width for content */
 .rail {
   width: 100%;
   max-width: 1024px;
@@ -161,7 +166,7 @@
   padding-right: 1.5rem;
 }
 
-/* Loading state — subtle fade */
+/* Loading state-subtle fade */
 .loading-text {
   color: var(--fg-dim);
   font-size: 0.875rem;
@@ -171,6 +176,13 @@
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.3;
+  }
 }

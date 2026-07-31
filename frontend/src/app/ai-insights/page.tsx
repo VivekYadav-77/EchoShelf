@@ -113,7 +113,7 @@ export default function AiInsightsPage() {
             marginBottom: '1rem',
           }}
         >
-          01 — Your music profile
+          01-Your music profile
         </span>
 
         <div
@@ -155,7 +155,7 @@ export default function AiInsightsPage() {
               marginBottom: '1.5rem',
             }}
           >
-            02 — Recommended for you
+            02-Recommended for you
           </span>
 
           <div
