@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   postgres:
@@ -31,6 +30,7 @@ services:
       - JWT_SECRET=${JWT_SECRET:-9a4f2c8d3b7a1e6f45c8a0b3f267d8b1d4e6f3c8a9d2b5f8e3a9c8b5f6v8a3d9}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - ECHOSHELF_FRONTEND_URL=http://localhost:3000
+      - COOKIE_SECURE=false
     depends_on:
       postgres:
         condition: service_healthy

@@ -1,6 +1,6 @@
 spring:
   application:
-    name: backend
+    name: echoshelf
 
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/musiclibrary}
@@ -25,17 +25,18 @@ server:
   port: 8080
 
 jwt:
-  secret: ${JWT_SECRET:8a4a754117b3a033c99f0e1f6e21019f85c13652c7e034e3234559c55b184293} # Default is a 256-bit hex string for dev
+  secret: ${JWT_SECRET} # Force env-var in prod
   expiration-ms: ${JWT_EXPIRATION_MS:86400000} # 24 hours
 
 echoshelf:
   frontend-url: ${FRONTEND_URL:http://localhost:3000}
 
 gemini:
-  api-key: "REDACTED"
+  api-key: ${GEMINI_API_KEY}
 
 logging:
   level:
     root: INFO
     com.echoshelf: DEBUG
     org.springframework.security: DEBUG
+    org.springframework.web.client: INFO

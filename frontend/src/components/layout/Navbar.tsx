@@ -162,8 +162,8 @@ export default function Navbar() {
                     color: 'var(--fg-dim)',
                     textDecoration: 'none',
                     transition: 'color 0.15s ease',
+                    display: typeof window !== 'undefined' && window.innerWidth >= 768 ? 'block' : 'none'
                   }}
-                  className="hidden md:block"
                   onMouseEnter={e => (e.currentTarget.style.color = 'var(--fg)')}
                   onMouseLeave={e => (e.currentTarget.style.color = 'var(--fg-dim)')}
                 >

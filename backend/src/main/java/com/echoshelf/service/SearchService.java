@@ -9,9 +9,10 @@ import org.springframework.web.client.RestClient;
 public class SearchService {
 
     private final RestClient restClient;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
-    public SearchService() {
+    public SearchService(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
         this.restClient = RestClient.builder()
                 .baseUrl("https://itunes.apple.com")
                 .build();
@@ -35,7 +36,7 @@ public class SearchService {
 
             return objectMapper.readValue(rawResponse, ItunesSearchResponse.class);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to fetch or parse iTunes search response", e);
+            throw new IllegalArgumentException("Failed to fetch search results from iTunes");
         }
     }
 }

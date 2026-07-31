@@ -6,37 +6,29 @@ import com.echoshelf.dto.library.UpdateLibraryItemRequest;
 import com.echoshelf.entity.LibraryItem;
 import com.echoshelf.entity.User;
 import com.echoshelf.repository.LibraryItemRepository;
-import com.echoshelf.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class LibraryService {
 
     private final LibraryItemRepository libraryItemRepository;
-    private final UserRepository userRepository;
+    private final UserContextService userContextService;
 
-    public LibraryService(LibraryItemRepository libraryItemRepository, UserRepository userRepository) {
+    public LibraryService(LibraryItemRepository libraryItemRepository, UserContextService userContextService) {
         this.libraryItemRepository = libraryItemRepository;
-        this.userRepository = userRepository;
-    }
-
-    private User getCurrentUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        this.userContextService = userContextService;
     }
 
     public Page<LibraryItemDTO> getUserLibrary(Pageable pageable) {
-        User user = getCurrentUser();
+        User user = userContextService.getCurrentUser();
         return libraryItemRepository.findAllByUserId(user.getId(), pageable)
                 .map(this::mapToDTO);
     }
 
     public LibraryItemDTO saveToLibrary(SaveLibraryItemRequest request) {
-        User user = getCurrentUser();
+        User user = userContextService.getCurrentUser();
 
         if (libraryItemRepository.existsByUserIdAndAppleCatalogId(user.getId(), request.getAppleCatalogId())) {
             throw new IllegalArgumentException("Album already saved to library");
@@ -58,7 +50,7 @@ public class LibraryService {
     }
 
     public LibraryItemDTO updateLibraryItem(Long id, UpdateLibraryItemRequest request) {
-        User user = getCurrentUser();
+        User user = userContextService.getCurrentUser();
 
         LibraryItem item = libraryItemRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Library item not found or you don't have access"));
@@ -75,7 +67,7 @@ public class LibraryService {
     }
 
     public void deleteLibraryItem(Long id) {
-        User user = getCurrentUser();
+        User user = userContextService.getCurrentUser();
         
         LibraryItem item = libraryItemRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Library item not found or you don't have access"));

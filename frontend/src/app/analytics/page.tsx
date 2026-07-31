@@ -86,7 +86,7 @@ export default function AnalyticsPage() {
     );
   }
 
-  const hasData = genres?.length > 0;
+  const hasData = genres && genres.length > 0;
 
   if (!hasData) {
     return (

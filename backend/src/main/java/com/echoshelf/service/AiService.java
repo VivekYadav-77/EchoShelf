@@ -8,11 +8,11 @@ import com.echoshelf.entity.AiInsight;
 import com.echoshelf.entity.User;
 import com.echoshelf.repository.AiInsightRepository;
 import com.echoshelf.repository.LibraryItemRepository;
-import com.echoshelf.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -24,8 +24,10 @@ import java.util.stream.Collectors;
 @Service
 public class AiService {
 
+    private static final Logger log = LoggerFactory.getLogger(AiService.class);
+
     private final LibraryItemRepository libraryItemRepository;
-    private final UserRepository userRepository;
+    private final UserContextService userContextService;
     private final AiInsightRepository aiInsightRepository;
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
@@ -33,22 +35,16 @@ public class AiService {
     @Value("${gemini.api-key:}")
     private String geminiApiKey;
 
-    public AiService(LibraryItemRepository libraryItemRepository, UserRepository userRepository, AiInsightRepository aiInsightRepository) {
+    public AiService(LibraryItemRepository libraryItemRepository, UserContextService userContextService, AiInsightRepository aiInsightRepository) {
         this.libraryItemRepository = libraryItemRepository;
-        this.userRepository = userRepository;
+        this.userContextService = userContextService;
         this.aiInsightRepository = aiInsightRepository;
         this.objectMapper = new ObjectMapper();
         this.restClient = RestClient.builder().baseUrl("https://generativelanguage.googleapis.com/v1beta/openai/").build();
     }
 
-    private User getCurrentUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-    }
-
     public LibrarySummaryResponse getLatestLibrarySummary() {
-        User user = getCurrentUser();
+        User user = userContextService.getCurrentUser();
         Optional<AiInsight> insightOpt = aiInsightRepository.findByUserId(user.getId());
 
         if (insightOpt.isEmpty()) {
@@ -66,7 +62,7 @@ public class AiService {
             );
             response.setRecommendations(recs);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            log.error("Failed to parse recommendations JSON", e);
             response.setRecommendations(List.of());
         }
 
@@ -78,7 +74,7 @@ public class AiService {
             return buildFallbackResponse("API key is not configured.");
         }
 
-        User user = getCurrentUser();
+        User user = userContextService.getCurrentUser();
         Long userId = user.getId();
 
         // 1. Gather stats
@@ -127,7 +123,7 @@ public class AiService {
 
             // 4. Save to DB
             AiInsight insight = aiInsightRepository.findByUserId(userId).orElse(new AiInsight());
-            insight.setUserId(userId);
+            insight.setUser(user);
             insight.setSummary(response.getSummary());
             insight.setRecommendations(objectMapper.writeValueAsString(response.getRecommendations()));
             aiInsightRepository.save(insight);
@@ -135,7 +131,7 @@ public class AiService {
             return response;
             
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to generate library summary", e);
             return buildFallbackResponse("Error: " + e.getMessage());
         }
     }
