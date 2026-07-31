@@ -12,7 +12,9 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -47,24 +49,38 @@ public class AuthController {
     public ResponseEntity<ApiResponse<String>> login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
         String token = authService.login(request);
         
-        Cookie cookie = new Cookie("jwt", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(cookieSecure); // Configurable based on env
-        cookie.setPath("/");
-        cookie.setMaxAge(jwtExpirationMs / 1000);
-        response.addCookie(cookie);
+        ResponseCookie.ResponseCookieBuilder cookieBuilder = ResponseCookie.from("jwt", token)
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .path("/")
+                .maxAge(jwtExpirationMs / 1000);
+                
+        if (cookieSecure) {
+            cookieBuilder.sameSite("None"); // Required for cross-domain (Vercel -> Render)
+        } else {
+            cookieBuilder.sameSite("Lax");  // Required for local HTTP development
+        }
+        
+        response.addHeader(HttpHeaders.SET_COOKIE, cookieBuilder.build().toString());
 
         return ResponseEntity.ok(ApiResponse.success("Login successful", null));
     }
 
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("jwt", null);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(cookieSecure);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
+        ResponseCookie.ResponseCookieBuilder cookieBuilder = ResponseCookie.from("jwt", "")
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .path("/")
+                .maxAge(0);
+                
+        if (cookieSecure) {
+            cookieBuilder.sameSite("None");
+        } else {
+            cookieBuilder.sameSite("Lax");
+        }
+        
+        response.addHeader(HttpHeaders.SET_COOKIE, cookieBuilder.build().toString());
         
         return ResponseEntity.ok(ApiResponse.success("Logout successful", null));
     }
