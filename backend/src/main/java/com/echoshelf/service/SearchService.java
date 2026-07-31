@@ -11,8 +11,8 @@ public class SearchService {
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
 
-    public SearchService(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+    public SearchService() {
+        this.objectMapper = new ObjectMapper();
         this.restClient = RestClient.builder()
                 .baseUrl("https://itunes.apple.com")
                 .build();
