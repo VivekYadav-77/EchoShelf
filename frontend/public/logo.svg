@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <defs>
+    <style>
+      @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-4px); }
+      }
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); opacity: 0.7; }
+        50% { transform: scale(1.1); opacity: 1; }
+      }
+      @keyframes blink {
+        0%, 96%, 100% { transform: scaleY(1); }
+        98% { transform: scaleY(0.1); }
+      }
+      .anim-float { animation: float 3s ease-in-out infinite; }
+      .anim-float-delay { animation: float 3s ease-in-out 1.5s infinite; }
+      .anim-pulse { animation: pulse 2s infinite; transform-origin: center; }
+      .eye { animation: blink 5s infinite; transform-origin: 50% 50%; }
+    </style>
+  </defs>
+
+  <!-- Shelf -->
+  <path d="M 10 85 L 90 85" stroke="#e74c3c" stroke-width="4" stroke-linecap="round" />
+  <path d="M 20 92 L 80 92" stroke="#e74c3c" stroke-width="4" stroke-linecap="round" opacity="0.5" />
+
+  <!-- Cartoonish Cat Shape -->
+  <g class="anim-float">
+    <!-- Body / Head -->
+    <path d="M 30 80 C 30 40, 70 40, 70 80 Z" fill="#ffffff" stroke="#e74c3c" stroke-width="3" />
+    
+    <!-- Ears -->
+    <path d="M 33 48 L 25 30 L 45 40 Z" fill="#ffffff" stroke="#e74c3c" stroke-width="3" stroke-linejoin="round" />
+    <path d="M 67 48 L 75 30 L 55 40 Z" fill="#ffffff" stroke="#e74c3c" stroke-width="3" stroke-linejoin="round" />
+    
+    <!-- Inner Ears -->
+    <path d="M 32 44 L 28 34 L 40 40 Z" fill="#ffbaba" />
+    <path d="M 68 44 L 72 34 L 60 40 Z" fill="#ffbaba" />
+    
+    <!-- Eyes -->
+    <g class="eye">
+      <circle cx="42" cy="55" r="3" fill="#111" />
+      <circle cx="58" cy="55" r="3" fill="#111" />
+    </g>
+    
+    <!-- Nose / Mouth -->
+    <path d="M 48 62 Q 50 65 52 62" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round" />
+    <circle cx="50" cy="59" r="1.5" fill="#e74c3c" />
+
+    <!-- Headphones -->
+    <path d="M 25 55 C 25 25, 75 25, 75 55" fill="none" stroke="#111" stroke-width="4" stroke-linecap="round" />
+    <rect x="20" y="50" width="10" height="16" rx="5" fill="#111" />
+    <rect x="70" y="50" width="10" height="16" rx="5" fill="#111" />
+    
+    <!-- Sound Waves / Echo -->
+    <g class="anim-pulse">
+      <path d="M 12 50 C 5 55, 5 61, 12 66" fill="none" stroke="#e74c3c" stroke-width="2" stroke-linecap="round" />
+      <path d="M 88 50 C 95 55, 95 61, 88 66" fill="none" stroke="#e74c3c" stroke-width="2" stroke-linecap="round" />
+    </g>
+    <g class="anim-float-delay">
+      <path d="M 16 54 C 12 57, 12 59, 16 62" fill="none" stroke="#e74c3c" stroke-width="2" stroke-linecap="round" />
+      <path d="M 84 54 C 88 57, 88 59, 84 62" fill="none" stroke="#e74c3c" stroke-width="2" stroke-linecap="round" />
+    </g>
+  </g>
+</svg>

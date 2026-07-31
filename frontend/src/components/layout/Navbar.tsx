@@ -86,14 +86,22 @@ export default function Navbar() {
           href={isAuthenticated && !isLoading ? '/dashboard' : '/'}
           className="wordmark"
           style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            textDecoration: 'none',
+            flexShrink: 0,
+          }}
+        >
+          <img src="/logo.svg" alt="EchoShelf Logo" style={{ width: '32px', height: '32px' }} />
+          <span style={{
             fontSize: '1rem',
             fontWeight: 600,
             color: 'var(--fg)',
             letterSpacing: '0.08em',
-            flexShrink: 0,
-          }}
-        >
-          ECHOSHELF
+          }}>
+            ECHOSHELF
+          </span>
         </Link>
 
         {/* Nav links-only when authenticated */}

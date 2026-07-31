@@ -21,6 +21,9 @@ const ibmPlexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "EchoShelf-Your Music Library",
   description: "Catalog your albums, track ratings, and get AI-powered music insights.",
+  icons: {
+    icon: "/logo.svg",
+  },
 };
 
 export default function RootLayout({

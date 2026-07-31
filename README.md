@@ -1,5 +1,8 @@
 # EchoShelf Platform
 
+<div align="center">
+  <img src="./frontend/public/logo.svg" alt="EchoShelf Logo" width="120" />
+</div>
 A full-stack, production-ready EchoShelf application allowing users to search the iTunes catalog, save albums to their personal library, rate them, and get AI-powered insights on their music taste.
 
 ## Features
