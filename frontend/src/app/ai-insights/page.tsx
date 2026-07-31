@@ -2,6 +2,8 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { aiApi } from '@/features/ai/api';
+import { libraryApi } from '@/features/library/api';
+import Link from 'next/link';
 
 function RefreshIcon() {
   return (
@@ -24,6 +26,12 @@ function SparkleIcon() {
 export default function AiInsightsPage() {
   const queryClient = useQueryClient();
 
+  const { data: libraryData, isLoading: isLoadingLibrary } = useQuery({
+    queryKey: ['library', 0, 1],
+    queryFn: () => libraryApi.getLibrary(0, 1),
+    staleTime: 5 * 60 * 1000,
+  });
+
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['ai', 'summary'],
     queryFn: aiApi.getLibrarySummary,
@@ -37,7 +45,7 @@ export default function AiInsightsPage() {
     },
   });
 
-  if (isLoading) {
+  if (isLoading || isLoadingLibrary) {
     return (
       <div className="rail" style={{ paddingTop: '3rem' }}>
         <p className="loading-text">Loading your insights...</p>
@@ -99,8 +107,8 @@ export default function AiInsightsPage() {
         {data && (
           <button
             onClick={() => generateSummary()}
-            disabled={isGenerating}
-            title="Regenerate analysis"
+            disabled={isGenerating || libraryData?.totalElements === 0}
+            title={libraryData?.totalElements === 0 ? "Add music to your library to regenerate analysis" : "Regenerate analysis"}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -110,7 +118,7 @@ export default function AiInsightsPage() {
               fontSize: '0.75rem',
               letterSpacing: '0.06em',
               color: 'var(--fg-dim)',
-              cursor: isGenerating ? 'not-allowed' : 'pointer',
+              cursor: (isGenerating || libraryData?.totalElements === 0) ? 'not-allowed' : 'pointer',
               padding: 0,
               transition: 'color 0.15s ease',
               fontFamily: 'var(--font-mono), monospace',
@@ -130,17 +138,34 @@ export default function AiInsightsPage() {
           <h2 style={{ fontSize: '1.5rem', color: 'var(--fg)', marginBottom: '1rem', fontWeight: 500 }}>
             Discover Your Music Identity
           </h2>
-          <p style={{ fontSize: '1rem', color: 'var(--fg-dim)', marginBottom: '2rem', maxWidth: '400px', margin: '0 auto 2rem' }}>
-            Let AI analyze your collection to uncover patterns in your taste and suggest hidden gems you might have missed.
-          </p>
-          <button
-            onClick={() => generateSummary()}
-            disabled={isGenerating}
-            className="btn-brick"
-            style={{ padding: '0.75rem 2rem', fontSize: '1rem' }}
-          >
-            {isGenerating ? 'Analyzing...' : 'Analyze My Library'}
-          </button>
+          {libraryData?.totalElements === 0 ? (
+            <>
+              <p style={{ fontSize: '1rem', color: 'var(--fg-dim)', marginBottom: '2rem', maxWidth: '400px', margin: '0 auto 2rem' }}>
+                Your library is empty! Add some music to your library first to unlock personalized AI insights and recommendations.
+              </p>
+              <Link
+                href="/library"
+                className="btn-brick"
+                style={{ padding: '0.75rem 2rem', fontSize: '1rem', display: 'inline-block', textDecoration: 'none' }}
+              >
+                Go to Library
+              </Link>
+            </>
+          ) : (
+            <>
+              <p style={{ fontSize: '1rem', color: 'var(--fg-dim)', marginBottom: '2rem', maxWidth: '400px', margin: '0 auto 2rem' }}>
+                Let AI analyze your collection to uncover patterns in your taste and suggest hidden gems you might have missed.
+              </p>
+              <button
+                onClick={() => generateSummary()}
+                disabled={isGenerating}
+                className="btn-brick"
+                style={{ padding: '0.75rem 2rem', fontSize: '1rem' }}
+              >
+                {isGenerating ? 'Analyzing...' : 'Analyze My Library'}
+              </button>
+            </>
+          )}
         </div>
       ) : (
         <>
